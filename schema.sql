@@ -7,7 +7,7 @@ USE bracu_info;
 CREATE TABLE Announcements (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    url VARCHAR(500) NOT NULL,
+    url VARCHAR(500) NOT NULL UNIQUE,
     message TEXT,
     published_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -55,7 +55,8 @@ CREATE TABLE ExamSchedule (
 CREATE TABLE AcademicDates (
     id INT AUTO_INCREMENT PRIMARY KEY,
     event_name VARCHAR(255) NOT NULL,
-    event_date DATE NOT NULL
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL
 );
 
 -- ==============================
@@ -109,12 +110,11 @@ CREATE TABLE TransportContactInfo (
 CREATE TABLE ContactInfo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
-    type VARCHAR(50),
-    email VARCHAR(50),
+    emails JSON,
     hours VARCHAR(255),
-    phone_no VARCHAR(20),
-    FOREIGN KEY (route_id) REFERENCES Transport(route_id) ON DELETE CASCADE
+    phone_no JSON
 );
+
 
 -- ==============================
 -- People

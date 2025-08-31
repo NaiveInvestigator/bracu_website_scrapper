@@ -45,7 +45,9 @@ while True:
                 message = content_div.get_text(separator="\n", strip=True)
                 # Find any <a> tags inside the div
                 for a_tag in content_div.find_all("a", href=True):
-                    link = "https:" + a_tag['href']
+                    link = a_tag['href']
+                    if "https:" not in link:
+                        link = "https:" + link
                     links.append(link)
 
                 message += "\nEmbedded Page Links :\n"

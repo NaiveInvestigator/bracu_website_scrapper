@@ -1,0 +1,127 @@
+import pdfplumber
+import mysql.connector
+from datetime import datetime
+import os
+
+def get_col_index(headers, keyword):
+    for idx, h in enumerate(headers):
+        if keyword.lower() in h.lower():
+            print(keyword,idx)
+            return idx
+    return None
+
+def parse_date(date_str):
+    if not date_str or date_str == "N/A":
+        return None
+    
+    # Possible date formats in PDF
+    formats = ["%Y-%m-%d", "%d-%b-%y", "%d-%b-%Y"]
+    
+    for fmt in formats:
+        try:
+            return datetime.strptime(date_str.strip(), fmt).date()
+        except ValueError:
+            continue
+    
+    # If nothing matches, return None
+    return None
+
+
+# MySQL connection
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",  # replace with your password
+    database="bracu_info"
+)
+cursor = conn.cursor()
+
+# PDF path
+# pdf_path = "./exam schedule pdfs/Final Spring 2025/LLB%20Final%20Schedule%20Spring%202025%20V2.pdf"
+pdf_path = "./exam schedule pdfs/Final Spring 2025/Final%20Schedule%20Spring%202025.pdf"
+
+# Get parent folder name as exam type
+exam_type = os.path.basename(os.path.dirname(pdf_path)) or "N/A"
+print("exam type:", exam_type)
+# Default student ID
+student_id = "N/A"
+
+with pdfplumber.open(pdf_path) as pdf:
+    total_pages = len(pdf.pages)
+    for i in range(total_pages):
+        page = pdf.pages[i]
+        tables = page.extract_tables()
+
+        if tables:
+            table = tables[0]
+
+            # Find header row index
+            header_index = None
+            for idx, row in enumerate(table):
+                if row and any("course" in str(c).lower() for c in row):
+                    header_index = idx
+                    break
+
+            if header_index is None:
+                continue
+
+            headers = table[header_index]
+            data_rows = table[header_index + 1:]
+
+            for row in data_rows:
+                if not row or all(cell is None for cell in row):
+                    continue
+
+                # Map columns
+                course_code = row[get_col_index(headers, "course")] if get_col_index(headers, "course") is not None else "N/A"
+                section = row[get_col_index(headers, "section")] if get_col_index(headers, "section") is not None else "N/A"
+                date_str = row[get_col_index(headers, "date")] if get_col_index(headers, "date") is not None else "N/A"
+                start_time_str = row[get_col_index(headers, "start time")] if get_col_index(headers, "start time") is not None else "N/A"
+                end_time_str = row[get_col_index(headers, "end time")] if get_col_index(headers, "end time") is not None else "N/A"
+                room_no = row[get_col_index(headers, "room")] if get_col_index(headers, "room") is not None else "N/A"
+                dept = row[get_col_index(headers, "dept")] if get_col_index(headers, "dept") is not None else "N/A"
+
+                # Convert date and time
+                try:
+                    date = parse_date(date_str)
+                    print("win")
+                except:
+                    print("fail")
+                    date = None
+
+                try:
+                    start_time = datetime.strptime(start_time_str, "%I:%M %p").time()
+                except:
+                    start_time = None
+
+                try:
+                    end_time = datetime.strptime(end_time_str, "%I:%M %p").time()
+                except:
+                    end_time = None
+
+                print("date", date)
+                # Insert into MySQL
+                sql = """
+                    INSERT INTO ExamSchedule 
+                    (type, course_code, section, date, start_time, end_time, room_no, dept, student_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(sql, (
+                    exam_type,
+                    course_code or "N/A",
+                    section or "N/A",
+                    date,
+                    start_time,
+                    end_time,
+                    room_no or "N/A",
+                    dept or "N/A",
+                    student_id
+                ))
+                conn.commit()
+        else:
+            print(f"No tables found on page {i+1}.")
+
+cursor.close()
+conn.close()
+print("PDF data inserted into MySQL successfully!")
+
