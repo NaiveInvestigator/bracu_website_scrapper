@@ -8,46 +8,73 @@
   <body class="bg-light">
     <div class="container my-5">
       <h1 class="mb-4">Announcements</h1>
+      <!-- Filter Form -->
+      <form id="filterForm" class="row g-3 mb-4">
+        <div class="col-md-3">
+          <input type="date" id="start_date" class="form-control" placeholder="Start Date">
+        </div>
+        <div class="col-md-3">
+          <input type="date" id="end_date" class="form-control" placeholder="End Date">
+        </div>
+        <div class="col-md-2">
+          <input type="number" id="limit" class="form-control" placeholder="Limit">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Fetch</button>
+        </div>
+      </form>
       <div id="announcements" class="row g-3">
         <!-- Cards will be inserted here -->
       </div>
     </div>
     <script>
-      async function loadAnnouncements() {
-      try {
-        const response = await fetch("http://localhost:8000/announcements");
-        const data = await response.json();
+      async function loadAnnouncements(startDate, endDate, limit) {
+        try {
+          let url = new URL("http://localhost:8000/announcements");
+          if (startDate) url.searchParams.append("start_date", startDate);
+          if (endDate) url.searchParams.append("end_date", endDate);
+          if (limit) url.searchParams.append("limit", limit);
 
-        // Ensure it's always an array
-        const announcements = Array.isArray(data) ? data : [data];
+          const response = await fetch(url);
+          const data = await response.json();
 
-        const container = document.getElementById("announcements");
-        container.innerHTML = "";
+          const announcements = Array.isArray(data) ? data : [data];
+          const container = document.getElementById("announcements");
+          container.innerHTML = "";
 
-        announcements.forEach(item => {
-          const card = document.createElement("div");
-          card.className = "col-md-6 col-lg-4";
-
-          card.innerHTML = `
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">${item.title}</h5>
-                <p class="card-text text-muted small">
-                  Published: ${new Date(item.published_date).toLocaleString()}
-                </p>
-                <p class="card-text">${item.message.split("\n")[0]}</p>
-                <a href="${item.url}" target="_blank" class="btn btn-primary btn-sm">Read more</a>
+          announcements.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "col-md-6 col-lg-4";
+            card.innerHTML = `
+              <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">${item.title}</h5>
+                  <p class="card-text text-muted small">
+                    Published: ${new Date(item.published_date).toLocaleString()}
+                  </p>
+                  <p class="card-text">${item.message.split("\n")[0]}</p>
+                  <a href="${item.url}" target="_blank" class="btn btn-primary btn-sm">Read more</a>
+                </div>
               </div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error("Error fetching announcements:", err);
+            `;
+            container.appendChild(card);
+          });
+        } catch (err) {
+          console.error("Error fetching announcements:", err);
+        }
       }
-    }
 
-    loadAnnouncements();
+      // Handle form submission
+      document.getElementById("filterForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const startDate = document.getElementById("start_date").value;
+        const endDate = document.getElementById("end_date").value;
+        const limit = document.getElementById("limit").value;
+        loadAnnouncements(startDate, endDate, limit);
+      });
+
+      // Initial load
+      loadAnnouncements();
     </script>
   </body>
 </html>
