@@ -41,8 +41,8 @@ def fetch_and_download_exam_schedule_pdfs():
             full_folder_path = os.path.join(base_folder, folder_name)
             os.makedirs(full_folder_path, exist_ok=True)
 
-            if "Embedded Page Links:" in message:
-                content_after = message.split("Embedded Page Links:", 1)[1].strip()
+            if "Embedded Page Links :" in message:
+                content_after = message.split("Embedded Page Links :", 1)[1].strip()
                 urls = [url.strip() for url in content_after.splitlines() if url.strip()]
                 for url in urls:
                     download_pdf_with_retry(url, full_folder_path)

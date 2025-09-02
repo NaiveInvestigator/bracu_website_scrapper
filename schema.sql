@@ -17,7 +17,7 @@ CREATE TABLE Announcements (
 -- ==============================
 CREATE TABLE ExamSchedule (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    type VARCHAR(10) NOT NULL,
+    type VARCHAR(100) NOT NULL,
     course_code VARCHAR(50) NOT NULL,
     section VARCHAR(50),
     date DATE NOT NULL,
