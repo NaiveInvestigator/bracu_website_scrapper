@@ -1,9 +1,6 @@
- do transport fare manually,create script that puts values
+do transport fare manually,create script that puts values
  create fastapi backend endpoints
  create simple static html that fetches endpoints
 
- figure out why
-
- /exam schedule pdfs/Final Spring 2025/Final%20Schedule%20Spring%202025.pdf
-Exam type: Final Spring 2025
-Error processing ./exam schedule pdfs/Final Spring 2025/Final%20Schedule%20Spring%202025.pdf: 1048 (23000): Column 'date' cannot be null
+redo the db and FASTAPI part for academic-dates so that we can filter by semester
+PS: Just add a semester colm

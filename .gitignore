@@ -1,3 +1,4 @@
 exam schedule pdfs/**
 *.pdf
 *.xml
+__pycache__/**

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Transport Information</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container my-5">
+      <h1 class="mb-4">BRACU Transport Information</h1>
+      <!-- Filter Form -->
+      <form id="filterForm" class="row g-3 mb-4">
+        <div class="col-md-4">
+          <input type="number" id="route_id" class="form-control" placeholder="Enter Route ID">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="transportTable">
+          <thead class="table-dark">
+            <tr>
+              <th>Route ID</th>
+              <th>Route Name</th>
+              <th>Stoppage</th>
+              <th>First Pickup</th>
+              <th>Second Pickup</th>
+              <th>First Dropoff</th>
+              <th>Second Dropoff</th>
+              <th>Phone No</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="8" class="text-center">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const API_URL = "http://localhost:8000/transport";
+
+    async function fetchTransport(route_id = "") {
+      let url = API_URL;
+      if (route_id) url += `?route_id=${route_id}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const tableBody = document.getElementById("tableBody");
+      tableBody.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data found</td></tr>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const row = `
+          <tr>
+            <td>${item.route_id}</td>
+            <td>${item.route_name}</td>
+            <td>${item.stoppage}</td>
+            <td>${item.first_pickup_time}</td>
+            <td>${item.second_pickup_time}</td>
+            <td>${item.first_dropoff_time}</td>
+            <td>${item.second_dropoff_time}</td>
+            <td>${item.phone_no}</td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    // Load default data
+    fetchTransport();
+
+    // Handle search
+    document.getElementById("filterForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const route_id = document.getElementById("route_id").value;
+      fetchTransport(route_id);
+    });
+    </script>
+  </body>
+</html>

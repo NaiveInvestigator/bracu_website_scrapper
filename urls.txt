@@ -1,0 +1,43 @@
+http://localhost:8000/announcements
+http://localhost:8000/exam-schedule
+http://localhost:8000/academic-dates
+http://localhost:8000/news
+http://localhost:8000/transport
+http://localhost:8000/contact-info
+http://localhost:8000/people
+
+def get_announcements(
+    start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    end_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    limit: Optional[int] = Query(None, description="Max number of results to return")
+):
+
+def get_exam_schedule(
+    exam_type: str = Query(..., description="Exam type, e.g. Final Fall 2022, Mid Spring 2025"),  # required
+    course_code: str = Query(..., description="Course code, e.g. CSE331"),  # required
+    section: Optional[str] = None,
+    student_id: Optional[str] = None
+):
+
+def get_academic_dates(
+    event_name: Optional[str] = None,
+    start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    end_date: Optional[str] = Query(None, description="YYYY-MM-DD")
+):
+
+def get_news(
+    title: Optional[str] = None,
+    start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    end_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
+    exact_date: Optional[str] = Query(None, description="YYYY-MM-DD")
+):
+
+def get_transport(route_id: Optional[int] = None):
+
+def get_contact_info(
+    name: Optional[str] = None,
+    id: Optional[int] = None
+):
+
+def get_people(name: Optional[str] = None):
+

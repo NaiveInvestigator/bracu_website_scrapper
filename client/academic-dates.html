@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Academic Dates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container my-5">
+      <h1 class="mb-4">Academic Dates</h1>
+      <!-- Filter Form -->
+      <form id="filterForm" class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label">Event Name</label>
+          <input type="text" class="form-control" id="eventName" placeholder="e.g. Final Examinations">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="startDate">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">End Date</label>
+          <input type="date" class="form-control" id="endDate">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Fetch Academic Dates</button>
+        </div>
+      </form>
+      <!-- Results -->
+      <div id="results" class="row g-3"></div>
+    </div>
+    <script>
+      async function loadAcademicDates(query = "") {
+      try {
+        const response = await fetch(`http://localhost:8000/academic-dates${query}`);
+        const data = await response.json();
+
+        const container = document.getElementById("results");
+        container.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-warning text-center">
+                No data found for the given filters.
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        data.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "col-md-6 col-lg-4";
+
+          card.innerHTML = `
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title">${item.event_name}</h5>
+                <p class="card-text"><strong>Start:</strong> ${item.start_date}</p>
+                <p class="card-text"><strong>End:</strong> ${item.end_date}</p>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error fetching academic dates:", err);
+        document.getElementById("results").innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger text-center">
+              Failed to fetch data. Please try again later.
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Handle form submission
+    document.getElementById("filterForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const eventName = document.getElementById("eventName").value.trim();
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+
+      const params = new URLSearchParams();
+      if (eventName) params.append("event_name", eventName);
+      if (startDate) params.append("start_date", startDate);
+      if (endDate) params.append("end_date", endDate);
+
+      const query = params.toString() ? `?${params.toString()}` : "";
+      loadAcademicDates(query);
+    });
+
+    // Load default data on page load
+    loadAcademicDates();
+    </script>
+  </body>
+</html>

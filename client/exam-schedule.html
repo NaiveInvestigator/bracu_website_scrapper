@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Exam Schedule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container my-5">
+      <h1 class="mb-4">Exam Schedule Lookup</h1>
+      <!-- Input Form -->
+      <form id="examForm" class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label">Exam Type</label>
+          <input type="text" class="form-control" id="examType" placeholder="e.g. Mid Summer 2025" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Course Code</label>
+          <input type="text" class="form-control" id="courseCode" placeholder="e.g. CSE391" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Section</label>
+          <input type="text" class="form-control" id="section" placeholder="e.g. 1">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Student ID</label>
+          <input type="text" class="form-control" id="studentId" placeholder="e.g. 22241087">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Fetch Exam Schedule</button>
+        </div>
+      </form>
+      <!-- Results -->
+      <div id="results" class="row g-3"></div>
+    </div>
+    <script>
+      document.getElementById("examForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const examType = document.getElementById("examType").value.trim();
+      const courseCode = document.getElementById("courseCode").value.trim();
+      const section = document.getElementById("section").value.trim();
+      const studentId = document.getElementById("studentId").value.trim();
+
+      // Build query params
+      const params = new URLSearchParams();
+      if (examType) params.append("exam_type", examType);
+      if (courseCode) params.append("course_code", courseCode);
+      if (section) params.append("section", section);
+      if (studentId) params.append("student_id", studentId);
+
+      const url = `http://localhost:8000/exam-schedule?${params.toString()}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const container = document.getElementById("results");
+        container.innerHTML = "";
+
+        // Ensure consistent format
+        const exams = Array.isArray(data) ? data : (Object.keys(data).length ? [data] : []);
+
+        if (exams.length === 0) {
+          container.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-warning text-center">
+                No data found for the given input.
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        exams.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "col-md-6";
+
+          card.innerHTML = `
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title">${item.course_code || "Unknown Course"}</h5>
+                <p class="card-text"><strong>Exam Type:</strong> ${item.exam_type || "N/A"}</p>
+                <p class="card-text"><strong>Date:</strong> ${item.date || "N/A"}</p>
+                <p class="card-text"><strong>Time:</strong> ${item.start_time || ""} - ${item.end_time || ""}</p>
+                <p class="card-text"><strong>Room:</strong> ${item.room || "TBA"}</p>
+                <p class="card-text"><strong>Section:</strong> ${item.section || ""}</p>
+                <p class="card-text"><strong>Student ID:</strong> ${item.student_id || ""}</p>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error fetching exam schedule:", err);
+        document.getElementById("results").innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger text-center">
+              Failed to fetch exam schedule. Please try again later.
+            </div>
+          </div>
+        `;
+      }
+    });
+    </script>
+  </body>
+</html>

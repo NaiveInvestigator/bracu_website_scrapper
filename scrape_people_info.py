@@ -20,15 +20,22 @@ while True:
     for u in people_links:
         link = u.loc.text
         print(f"\n--- {link} ---")
-        r2 = scraper.get(link)
+        r2 = scraper.get(link, allow_redirects=True)
+
+        # Check if redirected to the homepage
+        if r2.url.rstrip("/") == "https://www.bracu.ac.bd":
+            print("Redirected to homepage — skipping")
+            continue
+
         soup2 = BeautifulSoup(r2.content, "html.parser")
         divs = soup2.find_all("div", class_="block-content content")
         if len(divs) >= 3:
             text = divs[2].get_text(separator="\n", strip=True)
-            if text.startswith("From Bangladesh to the World"):
-                print("Info not found")
-            else:
-                print(text)
+            print(text)
+
+            imgs = divs[2].find_all("img")
+            img_urls = [img.get("src") for img in imgs if img.get("src")]
+            print(img_urls)
         else:
             print("No 3rd block-content div found")
 

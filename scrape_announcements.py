@@ -53,9 +53,8 @@ while True:
                 message += "\nEmbedded Page Links :\n"
                 message += "\n".join(links)
 
-        # Published date
-        date_tag = article.select_one("span.date-display-single")
-        published_date = date_tag.get_text(strip=True) if date_tag else "Unknown date"
+            date_tag = linked_soup.select_one("span.date-display-single")
+            published_date = date_tag.get_text(strip=True) if date_tag else None
 
         # Print results
         print(f"Title: {title}")
