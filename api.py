@@ -40,6 +40,9 @@ app = FastAPI(title="BRACU Info API")
 
 app.mount("/client/", StaticFiles(directory="client"), name="client")
 
+@app.get("/")
+def read_root():
+    return FileResponse("client/index.html")
 
 @app.get("/announcements")
 def get_announcements(
